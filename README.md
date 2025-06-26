@@ -36,9 +36,9 @@ Carrot
 ## Running
 
 ```bash
-./start.sh notify=1  # Enable macOS notifications
-./start.sh           # Also runs with notifications off (default)
-./start.sh notify=0  # Explicitly disable notifications
+./start.sh           # Runs with macOS notifications ON (default)
+./start.sh notify=0  # Disable notifications
+./start.sh notify=1  # Explicitly enable notifications
 ```
 
 Edit **websocket_listener.py** and replace YOUR_DISCORD_ID_HERE with your Discord User ID.
