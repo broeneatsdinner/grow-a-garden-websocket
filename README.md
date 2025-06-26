@@ -1,4 +1,6 @@
 # Grow a Garden on Roblox
+_A lightweight Python WebSocket client for Grow a Garden on Roblox (macOS-friendly)_
+
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)
 ![Platform](https://img.shields.io/badge/Platform-macOS-lightgrey)
 ![License](https://img.shields.io/badge/License-MIT-green)
@@ -6,6 +8,9 @@
 
 ## WebSocket Listener
 Listens for live stock updates from the **Grow a Garden** Roblox game and alerts you when specific items appear.
+
+## What is Grow a Garden?
+Grow a Garden is a Roblox game where players plant, harvest, and sell crops. This listener connects to its **unofficial API** via WebSocket, giving you **real-time inventory alerts** right from the Mac terminal — perfect for serious traders.
 
 ## Features
 - Real-time updates via WebSocket
@@ -20,7 +25,6 @@ Listens for live stock updates from the **Grow a Garden** Roblox game and alerts
 - Internet connection
 
 ## Setup
-
 ```bash
 python3 -m venv venv
 source venv/bin/activate
@@ -34,7 +38,6 @@ Carrot
 ```
 
 ## Running
-
 ```bash
 ./start.sh           # Runs with macOS notifications ON (default)
 ./start.sh notify=0  # Disable notifications
@@ -46,7 +49,6 @@ Edit **websocket_listener.py** and replace YOUR_DISCORD_ID_HERE with your Discor
 >  [How to find your Discord User ID](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID).
 
 ## Notes
-
 - This script is macOS-only (uses osascript for notifications).
 - Tested on macOS 14+ with iTerm2.
 - PRs welcome!
