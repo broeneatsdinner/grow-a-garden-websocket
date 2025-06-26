@@ -1,4 +1,5 @@
-# Grow a Garden WebSocket Listener
+# Grow a Garden on Roblox
+## WebSocket Listener
 
 Listens for live stock updates from the Grow a Garden game and alerts when specific items appear.
 
