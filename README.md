@@ -35,7 +35,9 @@ Carrot
 ./start.sh notify=0  # Disable notifications (default)
 ```
 
-Edit websocket_listener.py and replace YOUR_DISCORD_ID_HERE with your Discord ID.
+Edit **websocket_listener.py** and replace YOUR_DISCORD_ID_HERE with your Discord ID.
+
+> You can find your Discord user ID [using these steps](https://discordhelp.net/discord-user-id).
 
 ## Notes
 
