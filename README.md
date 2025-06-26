@@ -1,18 +1,18 @@
 # Grow a Garden on Roblox
 ## WebSocket Listener
 
-Listens for live stock updates from the Grow a Garden game and alerts when specific items appear.
+Listens for live stock updates from the **Grow a Garden** Roblox game and alerts you when specific items appear.
 
 ## Features
 - Real-time updates via WebSocket
-- Keyword alerts (configurable)
-- macOS desktop notifications
+- Configurable keyword alerts
+- macOS desktop notifications (`osascript`)
 - Weather event display
-- Toggle notifications on/off via CLI
+- Toggle notifications via CLI (`notify=1` or `notify=0`)
 
 ## Requirements
 - Python 3.8+
-- macOS (for notification support via `osascript`)
+- macOS (for notification support)
 - Internet connection
 
 ## Setup
@@ -33,16 +33,16 @@ Carrot
 
 ```bash
 ./start.sh notify=1  # Enable macOS notifications
-./start.sh notify=0  # Disable notifications (default)
+./start.sh           # Also runs with notifications off (default)
+./start.sh notify=0  # Explicitly disable notifications
 ```
 
-Edit **websocket_listener.py** and replace YOUR_DISCORD_ID_HERE with your Discord ID.
+Edit **websocket_listener.py** and replace YOUR_DISCORD_ID_HERE with your Discord User ID.
 
-> You can find your Discord user ID [using these steps](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID).
+>  [How to find your Discord User ID](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID).
 
 ## Notes
 
-- This script is designed for macOS (uses osascript for notifications).
-- Tested on macOS 14+ and iTerm2.
-
- PRs welcome!
+- This script is macOS-only (uses osascript for notifications).
+- Tested on macOS 14+ with iTerm2.
+- PRs welcome!
