@@ -13,8 +13,8 @@ Listens for live stock updates from the **Grow a Garden** Roblox game and alerts
 **Grow a Garden** is a Roblox game where players plant, harvest, and sell crops. This listener connects to its **unofficial WebSocket API** to deliver **real-time inventory alerts** straight to your Mac terminal — perfect for serious traders and inventory hoarders.
 
 ## Features
-- Real-time updates via a WebSocket connection keeps bandwidth to a minimum with low-overhead
-- Lightweight by design - just listens via WebSocket, so it reacts instantly without hammering the server
+- Real-time updates via WebSocket (low overhead, no constant polling)
+- Lightweight design — reacts instantly by _listening_, like we wish all our friends did
 - Configurable keyword alerts
 - macOS desktop notifications (`osascript`)
 - Weather event display
