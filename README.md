@@ -1,6 +1,11 @@
 # Grow a Garden on Roblox
 ## WebSocket Listener
 
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)
+![Platform](https://img.shields.io/badge/Platform-macOS-lightgrey)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Status](https://img.shields.io/badge/Status-Active-brightgreen)
+
 Listens for live stock updates from the **Grow a Garden** Roblox game and alerts you when specific items appear.
 
 ## Features
