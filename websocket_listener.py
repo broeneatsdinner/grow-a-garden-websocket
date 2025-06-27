@@ -4,6 +4,7 @@ import json
 import datetime
 import os
 import subprocess
+from plugins.blink import blink
 
 # Define terminal color codes
 WHITE = "\033[37m"
@@ -133,6 +134,10 @@ async def listen():
 					summary = ", ".join(format_alert(a) for a in alerted)
 					print(f"\n🔔  Matched keywords this update: {summary}")
 					notify("🌱  Grow a Garden Stock Alert", ", ".join(alerted))
+					blink("white", 1) # Use the blink(1) light to signal something is available
+
+				else:
+					blink("off", 0)
 
 			except Exception as e:
 				print("⚠️  Error:", e)
