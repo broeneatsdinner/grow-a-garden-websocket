@@ -48,6 +48,7 @@ async def listen():
 	url = f"wss://websocket.joshlei.com/growagarden?user_id={DISCORD_USER_ID}"
 	keywords = load_keywords()
 
+	# Define the stock sections in the order you want to print them
 	STOCK_ORDER = [
 		"WEATHER",
 		"EVENTSHOP_STOCK",
@@ -57,94 +58,110 @@ async def listen():
 		"GEAR_STOCK"
 	]
 
-	async with websockets.connect(url) as ws:
-		print("✅  Connected to Grow a Garden WebSocket.\nWaiting for stock updates...\n")
-		notify("🌱  Connected to Grow a Garden WebSocket", "Waiting for stock updates...")
-		while True:
-			try:
-				raw = await ws.recv()
-				data = json.loads(raw)
-				timestamp = current_timestamp()
-				alerted = []
+	while True:  # ✅ New: keep reconnecting forever
+		try:
+			# ✅ Add ping_interval to send heartbeats every 30 sec
+			async with websockets.connect(
+				url,
+				ping_interval=30,  # keepalive ping every 30 sec
+				ping_timeout=10    # if no pong in 10 sec, consider it dead
+			) as ws:
+				print("✅  Connected to Grow a Garden WebSocket.\nWaiting for stock updates...\n")
+				notify("🌱  Connected to Grow a Garden WebSocket", "Waiting for stock updates...")
 
-				# Collect output chunks by section
-				chunks = {}
+				while True:
+					# Receive a stock update
+					raw = await ws.recv()
+					data = json.loads(raw)
+					timestamp = current_timestamp()
+					alerted = []
 
-				for section, items in data.items():
-					section_upper = section.upper()
-					lines = [f"\n🗂️  {section_upper} @ {timestamp}"]
+					# Collect output chunks by section
+					chunks = {}
 
-					# Special case: WEATHER
-					if section_upper == "WEATHER":
-						active_items = [w for w in items if w.get("active")]
+					for section, items in data.items():
+						section_upper = section.upper()
+						lines = [f"\n🗂️  {section_upper} @ {timestamp}"]
 
-						if not active_items:
-							lines.append("  (No active weather event)")
-						else:
-							for item in active_items:
-								name = item.get("weather_name", item.get("weather_id", "Unknown"))
-								start_unix = item.get("start_duration_unix", 0)
-								end_unix = item.get("end_duration_unix", 0)
-								start = datetime.datetime.fromtimestamp(start_unix).strftime('%H:%M:%S') if start_unix else "?"
-								end = datetime.datetime.fromtimestamp(end_unix).strftime('%H:%M:%S') if end_unix else "?"
-								lines.append(f"  - {name} ({start} → {end})")
+						# Special case: WEATHER
+						if section_upper == "WEATHER":
+							active_items = [w for w in items if w.get("active")]
+
+							if not active_items:
+								lines.append("  (No active weather event)")
+							else:
+								for item in active_items:
+									name = item.get("weather_name", item.get("weather_id", "Unknown"))
+									start_unix = item.get("start_duration_unix", 0)
+									end_unix = item.get("end_duration_unix", 0)
+									start = datetime.datetime.fromtimestamp(start_unix).strftime('%H:%M:%S') if start_unix else "?"
+									end = datetime.datetime.fromtimestamp(end_unix).strftime('%H:%M:%S') if end_unix else "?"
+									lines.append(f"  - {name} ({start} → {end})")
+
+							chunks[section_upper] = "\n".join(lines)
+							continue
+
+						# Example WEATHER debug block (keep commented if unused)
+						# if section_upper == "WEATHER":
+						# 	print(f"\n🐞  DEBUG WEATHER RAW:\n{json.dumps(items, indent=2)}\n")
+						# 	if not items:
+						# 		lines.append("  (No active weather event)")
+						# 	else:
+						# 		for item in items:
+						# 			name = item.get("display_name", item.get("weather_id", "Unknown"))
+						# 			start = item.get("Date_Start", "")
+						# 			end = item.get("Date_End", "")
+						# 			lines.append(f"  - {name} ({start} → {end})")
+						# 	chunks[section_upper] = "\n".join(lines)
+						# 	continue
+
+						# Standard stock handling
+						for item in items:
+							name = item.get("display_name", "Unknown")
+							qty = item.get("quantity", 0)
+							lines.append(f"  - {name} × {qty}")
+							if name.lower() in keywords:
+								alerted.append(f"{name} × {qty}")
 
 						chunks[section_upper] = "\n".join(lines)
-						continue
 
-					# Special case: WEATHER debugging
-					# if section_upper == "WEATHER":
-					# 	print(f"\n🐞  DEBUG WEATHER RAW:\n{json.dumps(items, indent=2)}\n")
-					# 	if not items:
-					# 		lines.append("  (No active weather event)")
-					# 	else:
-					# 		for item in items:
-					# 			name = item.get("display_name", item.get("weather_id", "Unknown"))
-					# 			start = item.get("Date_Start", "")
-					# 			end = item.get("Date_End", "")
-					# 			lines.append(f"  - {name} ({start} → {end})")
-					# 	chunks[section_upper] = "\n".join(lines)
-					# 	continue
+					# Print sections in defined order
+					for section in STOCK_ORDER:
+						if section in chunks:
+							print(chunks[section])
 
-					# Standard stock handling
-					for item in items:
-						name = item.get("display_name", "Unknown")
-						qty = item.get("quantity", 0)
-						lines.append(f"  - {name} × {qty}")
-						if name.lower() in keywords:
-							alerted.append(f"{name} × {qty}")
+					# Print any unmatched sections last
+					for section in sorted(chunks):
+						if section not in STOCK_ORDER:
+							print(chunks[section])
 
-					chunks[section_upper] = "\n".join(lines)
+					if alerted:
+						def format_alert(item_str):
+							name, qty = item_str.rsplit(" × ", 1)
+							return f"{WHITE}{name}{RESET} × {ORANGE}{qty}{RESET}"
 
-				# Print sections in defined order
-				for section in STOCK_ORDER:
-					if section in chunks:
-						print(chunks[section])
+						summary = ", ".join(format_alert(a) for a in alerted)
+						print(f"\n🔔  Matched keywords this update: {summary}")
+						notify("🌱  Grow a Garden Stock Alert", ", ".join(alerted))
+						blink("white", fade_ms=100, brightness_pct=100)  # Turn on and stay on
+					else:
+						blink("off", fade_ms=100)  # Turn off
 
-				# Print any unmatched sections last
-				for section in sorted(chunks):
-					if section not in STOCK_ORDER:
-						print(chunks[section])
+		# ✅ These exceptions mean the connection closed: reconnect
+		except (websockets.exceptions.ConnectionClosedError, websockets.exceptions.ConnectionClosedOK) as e:
+			print(f"⚠️  Connection closed: {e} --- reconnecting in 5s...")
+			await asyncio.sleep(5)
 
-				if alerted:
-					def format_alert(item_str):
-						name, qty = item_str.rsplit(" × ", 1)
-						return f"{WHITE}{name}{RESET} × {ORANGE}{qty}{RESET}"
-
-					summary = ", ".join(format_alert(a) for a in alerted)
-					print(f"\n🔔  Matched keywords this update: {summary}")
-					notify("🌱  Grow a Garden Stock Alert", ", ".join(alerted))
-					blink("white", fade_ms=100, brightness_pct=100)  # Turn on and stay on
-
-				else:
-					blink("off", fade_ms=100)  # Turn off
-
-			except Exception as e:
-				print("⚠️  Error:", e)
-				await asyncio.sleep(5)
+		# ✅ Any other error: log + reconnect
+		except Exception as e:
+			print(f"⚠️  Error: {e} --- reconnecting in 5s...")
+			await asyncio.sleep(5)
 
 async def main():
 	await listen()
 
 if __name__ == "__main__":
-	asyncio.run(main())
+	try:
+		asyncio.run(main())
+	except KeyboardInterrupt:
+		print("\n👋  Exiting cleanly.")
