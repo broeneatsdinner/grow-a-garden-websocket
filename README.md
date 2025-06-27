@@ -14,7 +14,7 @@ Listens for live stock updates from the **Grow a Garden** Roblox game and alerts
 
 ### 🖥️ Example Output
 Real-time terminal output (with WEATHER event duration):  
-![Grow a Garden WebSocket terminal screenshot](assets/websocket-output-demo-2.png)
+<img src="assets/websocket-output-demo-2.png" alt="Grow a Garden WebSocket terminal screenshot">
 
 ## Features
 - Real-time updates via WebSocket (low overhead, no constant polling)
