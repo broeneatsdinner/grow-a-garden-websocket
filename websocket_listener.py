@@ -75,16 +75,35 @@ async def listen():
 
 					# Special case: WEATHER
 					if section_upper == "WEATHER":
-						if not items:
+						active_items = [w for w in items if w.get("active")]
+
+						if not active_items:
 							lines.append("  (No active weather event)")
 						else:
-							for item in items:
-								name = item.get("display_name", item.get("weather_id", "Unknown"))
-								start = item.get("Date_Start", "")
-								end = item.get("Date_End", "")
+							for item in active_items:
+								name = item.get("weather_name", item.get("weather_id", "Unknown"))
+								start_unix = item.get("start_duration_unix", 0)
+								end_unix = item.get("end_duration_unix", 0)
+								start = datetime.datetime.fromtimestamp(start_unix).strftime('%H:%M:%S') if start_unix else "?"
+								end = datetime.datetime.fromtimestamp(end_unix).strftime('%H:%M:%S') if end_unix else "?"
 								lines.append(f"  - {name} ({start} → {end})")
+
 						chunks[section_upper] = "\n".join(lines)
 						continue
+
+					# Special case: WEATHER debugging
+					# if section_upper == "WEATHER":
+					# 	print(f"\n🐞  DEBUG WEATHER RAW:\n{json.dumps(items, indent=2)}\n")
+					# 	if not items:
+					# 		lines.append("  (No active weather event)")
+					# 	else:
+					# 		for item in items:
+					# 			name = item.get("display_name", item.get("weather_id", "Unknown"))
+					# 			start = item.get("Date_Start", "")
+					# 			end = item.get("Date_End", "")
+					# 			lines.append(f"  - {name} ({start} → {end})")
+					# 	chunks[section_upper] = "\n".join(lines)
+					# 	continue
 
 					# Standard stock handling
 					for item in items:
