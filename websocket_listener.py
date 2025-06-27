@@ -134,10 +134,10 @@ async def listen():
 					summary = ", ".join(format_alert(a) for a in alerted)
 					print(f"\n🔔  Matched keywords this update: {summary}")
 					notify("🌱  Grow a Garden Stock Alert", ", ".join(alerted))
-					blink("white", 0, fade_ms=150)  # Turn on and stay on
+					blink("white", fade_ms=100, brightness_pct=100)  # Turn on and stay on
 
 				else:
-					blink("off", 0, fade_ms=150)  # Turn off
+					blink("off", fade_ms=100)  # Turn off
 
 			except Exception as e:
 				print("⚠️  Error:", e)
