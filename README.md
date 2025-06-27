@@ -12,7 +12,7 @@ Listens for live stock updates from the **Grow a Garden** Roblox game and alerts
 ## What is Grow a Garden?
 **Grow a Garden** is a Roblox game where players plant, harvest, and sell crops. This listener connects to its **unofficial WebSocket API** to deliver **real-time inventory alerts** straight to your Mac terminal — perfect for serious traders and inventory hoarders.
 
-![Grow a Garden WebSocket terminal screenshot](assets/websocket-output-demo.png.png)
+![Grow a Garden WebSocket terminal screenshot](assets/websocket-output-demo.png)
 
 ## Features
 - Real-time updates via WebSocket (low overhead, no constant polling)
