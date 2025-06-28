@@ -19,7 +19,11 @@ done
 export GAG_NOTIFY="$notify"
 
 # Activate the virtual environment
+echo "Sourcing the python virtual environment."
+echo
 source venv/bin/activate
 
 # Run the listener
+echo "Starting the python WebSocket Listener."
+echo
 python websocket_listener.py
