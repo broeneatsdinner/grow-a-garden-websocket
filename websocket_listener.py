@@ -7,7 +7,7 @@ import subprocess
 import time   # <<< NEW
 import atexit # <<< NEW
 
-from plugins.blink import blink
+from plugins.blink import blink, fade_up_down
 
 # --- Blink state ---
 is_light_on = False         # <<< NEW
@@ -143,7 +143,7 @@ async def listen():
 						notify("🌱  Grow a Garden Stock Alert", ", ".join(alerted))
 
 						if not is_light_on or (current_time - last_blink_time) > cooldown_seconds:
-							blink("white", fade_ms=100, brightness_pct=100)
+							fade_up_down(up_ms=500, hold_ms=0, down_ms=30000)  # fade in 0.5 sec → no hold → fade out 30 seconds
 							is_light_on = True
 							last_blink_time = current_time
 					else:
