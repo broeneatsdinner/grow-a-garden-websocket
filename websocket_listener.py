@@ -4,7 +4,18 @@ import json
 import datetime
 import os
 import subprocess
+import time   # <<< NEW
+import atexit # <<< NEW
+
 from plugins.blink import blink
+
+# --- Blink state ---
+is_light_on = False         # <<< NEW
+last_blink_time = 0         # <<< NEW
+cooldown_seconds = 5        # <<< NEW
+
+# --- Ensure blink(1) turns off on exit ---
+atexit.register(lambda: blink("off"))  # <<< NEW
 
 # Define terminal color codes
 WHITE = "\033[37m"
@@ -45,6 +56,8 @@ def notify(title, message):
 	])
 
 async def listen():
+	global is_light_on, last_blink_time   # <<< Needed to modify globals
+
 	url = f"wss://websocket.joshlei.com/growagarden?user_id={DISCORD_USER_ID}"
 	keywords = load_keywords()
 
@@ -58,19 +71,17 @@ async def listen():
 		"GEAR_STOCK"
 	]
 
-	while True:  # ✅ New: keep reconnecting forever
+	while True:  # ✅ Keep reconnecting forever
 		try:
-			# ✅ Add ping_interval to send heartbeats every 30 sec
 			async with websockets.connect(
 				url,
-				ping_interval=30,  # keepalive ping every 30 sec
-				ping_timeout=10    # if no pong in 10 sec, consider it dead
+				ping_interval=30,
+				ping_timeout=10
 			) as ws:
 				print("✅  Connected to Grow a Garden WebSocket.\nWaiting for stock updates...\n")
 				notify("🌱  Connected to Grow a Garden WebSocket", "Waiting for stock updates...")
 
 				while True:
-					# Receive a stock update
 					raw = await ws.recv()
 					data = json.loads(raw)
 					timestamp = current_timestamp()
@@ -83,7 +94,6 @@ async def listen():
 						section_upper = section.upper()
 						lines = [f"\n🗂️  {section_upper} @ {timestamp}"]
 
-						# Special case: WEATHER
 						if section_upper == "WEATHER":
 							active_items = [w for w in items if w.get("active")]
 
@@ -101,21 +111,6 @@ async def listen():
 							chunks[section_upper] = "\n".join(lines)
 							continue
 
-						# Example WEATHER debug block (keep commented if unused)
-						# if section_upper == "WEATHER":
-						# 	print(f"\n🐞  DEBUG WEATHER RAW:\n{json.dumps(items, indent=2)}\n")
-						# 	if not items:
-						# 		lines.append("  (No active weather event)")
-						# 	else:
-						# 		for item in items:
-						# 			name = item.get("display_name", item.get("weather_id", "Unknown"))
-						# 			start = item.get("Date_Start", "")
-						# 			end = item.get("Date_End", "")
-						# 			lines.append(f"  - {name} ({start} → {end})")
-						# 	chunks[section_upper] = "\n".join(lines)
-						# 	continue
-
-						# Standard stock handling
 						for item in items:
 							name = item.get("display_name", "Unknown")
 							qty = item.get("quantity", 0)
@@ -130,10 +125,12 @@ async def listen():
 						if section in chunks:
 							print(chunks[section])
 
-					# Print any unmatched sections last
 					for section in sorted(chunks):
 						if section not in STOCK_ORDER:
 							print(chunks[section])
+
+					# <<< NEW: Debounce blink logic
+					current_time = time.time()   # <<<
 
 					if alerted:
 						def format_alert(item_str):
@@ -143,16 +140,20 @@ async def listen():
 						summary = ", ".join(format_alert(a) for a in alerted)
 						print(f"\n🔔  Matched keywords this update: {summary}")
 						notify("🌱  Grow a Garden Stock Alert", ", ".join(alerted))
-						blink("white", fade_ms=100, brightness_pct=100)  # Turn on and stay on
-					else:
-						blink("off", fade_ms=100)  # Turn off
 
-		# ✅ These exceptions mean the connection closed: reconnect
+						if not is_light_on or (current_time - last_blink_time) > cooldown_seconds:
+							blink("white", fade_ms=100, brightness_pct=100)
+							is_light_on = True
+							last_blink_time = current_time
+					else:
+						if is_light_on:
+							blink("off", fade_ms=100)
+							is_light_on = False
+
 		except (websockets.exceptions.ConnectionClosedError, websockets.exceptions.ConnectionClosedOK) as e:
 			print(f"⚠️  Connection closed: {e} --- reconnecting in 5s...")
 			await asyncio.sleep(5)
 
-		# ✅ Any other error: log + reconnect
 		except Exception as e:
 			print(f"⚠️  Error: {e} --- reconnecting in 5s...")
 			await asyncio.sleep(5)
