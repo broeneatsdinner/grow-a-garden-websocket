@@ -59,7 +59,7 @@ async def listen():
 	global is_light_on, last_blink_time   # <<< Needed to modify globals
 
 	url = f"wss://websocket.joshlei.com/growagarden?user_id={DISCORD_USER_ID}"
-	keywords = load_keywords()
+	# Removed upfront keywords load --- now reloaded live
 
 	# Define the stock sections in the order you want to print them
 	STOCK_ORDER = [
@@ -86,6 +86,7 @@ async def listen():
 					data = json.loads(raw)
 					timestamp = current_timestamp()
 					alerted = []
+					keywords = load_keywords()  # <<< NEW: reload each stock update
 
 					# Collect output chunks by section
 					chunks = {}
