@@ -15,3 +15,6 @@ python plugins/blink.py --easeinout -c white -f 1000
 
 # ⚫ Turn off manually
 python plugins/blink.py --off
+
+# 🟢 Python fade combo: fade up → hold → fade down
+python plugins/blink.py --fadecombo -u 1000 -h 1500 -d 3000

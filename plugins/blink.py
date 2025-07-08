@@ -81,6 +81,18 @@ def boop_easeinout(color: str = "orange", fade_ms: int = 50, delay: float = 0.05
 		blink(color=color, fade_ms=fade_ms, brightness_pct=brightness)
 		time.sleep(delay)
 
+def fade_up_down(up_ms=1000, hold_ms=1500, down_ms=3000):
+	"""
+	Fade up to full white, hold, then fade back to off.
+	"""
+	print(f"🔵 Fade UP over {up_ms}ms → hold {hold_ms}ms → fade DOWN over {down_ms}ms")
+
+	subprocess.run(['blink1-tool', '-m', str(up_ms), '--rgb=ffffff'])
+	time.sleep(hold_ms / 1000)
+	subprocess.run(['blink1-tool', '-m', str(down_ms), '--rgb=000000'])
+
+	print("✅ Fade sequence done.")
+
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description="Control the Blink(1) USB light.")
 	parser.add_argument("-c", "--color", type=str, default="green",
@@ -97,6 +109,14 @@ if __name__ == "__main__":
 	                    help="Play exponential ease-in brightness")
 	parser.add_argument("--easeinout", action="store_true",
 	                    help="Play ease-in-out exponential brightness")
+	parser.add_argument("--fadecombo", action="store_true",
+	                    help="Fade up → hold → fade down sequence")
+	parser.add_argument("-u", "--up", type=int, default=1000,
+	                    help="Fade-up duration in ms for fade combo")
+	parser.add_argument("-H", "--hold", type=int, default=1500,
+	                    help="Hold duration in ms for fade combo (NOTE: -H to avoid -h/--help conflict)")
+	parser.add_argument("-d", "--down", type=int, default=3000,
+	                    help="Fade-down duration in ms for fade combo")
 	parser.add_argument("--off", action="store_true",
 	                    help="Turn the Blink(1) light off")
 
@@ -112,5 +132,7 @@ if __name__ == "__main__":
 		boop_easein(color=args.color, fade_ms=args.fade)
 	elif args.wave:
 		boop_wave(color=args.color, fade_ms=args.fade)
+	elif args.fadecombo:
+		fade_up_down(up_ms=args.up, hold_ms=args.hold, down_ms=args.down)
 	else:
 		blink(args.color, args.fade, args.brightness)
