@@ -32,7 +32,9 @@ def load_keywords():
 		with open("keywords.txt", "r") as f:
 			for line in f:
 				kw = line.strip()
-				if kw and not kw.startswith("#"):
+				if "#" in kw:
+					kw = kw.split("#", 1)[0].strip()
+				if kw:
 					keywords.add(kw.lower())
 	except FileNotFoundError:
 		pass
