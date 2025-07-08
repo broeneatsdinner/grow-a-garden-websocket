@@ -57,6 +57,20 @@ def notify(title, message):
 		f'display notification "{message}" with title "{title}" sound name "Funk"'
 	])
 
+# --- FIXED: updated fade helper ---
+def fade_up_down_fixed(up_ms=1000, hold_ms=0, down_ms=30000):
+	# print(f"🔵  Fade UP over {up_ms}ms → hold {hold_ms}ms → fade DOWN over {down_ms}ms")
+	subprocess.run(
+		['blink1-tool', '-m', str(up_ms), '--rgb=ffffff'],
+		stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+	)
+	time.sleep((up_ms + hold_ms) / 1000)
+	subprocess.run(
+		['blink1-tool', '-m', str(down_ms), '--rgb=000000'],
+		stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+	)
+	# print("✅  Fade sequence done.")
+
 async def listen():
 	global is_light_on, last_blink_time   # <<< Needed to modify globals
 
@@ -132,7 +146,7 @@ async def listen():
 						if section not in STOCK_ORDER:
 							print(chunks[section])
 
-					# <<< NEW: Debounce blink logic
+					# <<< NEW: Debounce fade
 					current_time = time.time()   # <<<
 
 					if alerted:
@@ -145,7 +159,7 @@ async def listen():
 						notify("🌱  Grow a Garden Stock Alert", ", ".join(alerted))
 
 						if not is_light_on or (current_time - last_blink_time) > cooldown_seconds:
-							fade_up_down(up_ms=500, hold_ms=0, down_ms=30000)  # fade in 0.5 sec → no hold → fade out 30 seconds
+							fade_up_down_fixed(up_ms=500, hold_ms=0, down_ms=30000)  # fade in 0.5s, fade out 30s
 							is_light_on = True
 							last_blink_time = current_time
 					else:
